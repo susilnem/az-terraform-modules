@@ -25,16 +25,16 @@ output "nsg_associations" {
 
 output "virtual_machines" {
   description = "The details of the virtual machines"
-  value       = {
+  value = {
     for vm, vm_config in module.virtual_machines :
     vm => {
-      id                   = vm_config.vm_id
-      public_ip            = vm_config.vm_public_ip
-      private_ip           = vm_config.vm_private_ip
-      admin_username       = vm_config.vm_admin_username
-      os_disk_id           = vm_config.vm_os_disk_id
-      data_disks           = vm_config.vm_data_disks
-      network_interface_id = vm_config.vm_network_interface_id
+      id                           = vm_config.vm_id
+      public_ip                    = vm_config.vm_public_ip
+      private_ip                   = vm_config.vm_private_ip
+      admin_username               = vm_config.vm_admin_username
+      os_disk_id                   = vm_config.vm_os_disk_id
+      data_disks                   = vm_config.vm_data_disks
+      network_interface_id         = vm_config.vm_network_interface_id
       network_interface_private_ip = vm_config.vm_network_interface_private_ip
     }
   }

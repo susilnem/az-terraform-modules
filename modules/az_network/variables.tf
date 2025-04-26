@@ -19,7 +19,7 @@ variable "vnet_config" {
 variable "subnet_configs" {
   description = "Map of subnet configurations"
   type = map(object({
-    address_prefixes = list(string)
+    address_prefixes  = list(string)
     service_endpoints = optional(list(string))
     delegations = optional(list(object({
       name    = string
@@ -49,9 +49,9 @@ variable "route_table_configs" {
   description = "Map of Route Table configurations per subnet"
   type = map(object({
     routes = optional(list(object({
-      name           = string
-      address_prefix = string
-      next_hop_type  = string
+      name                   = string
+      address_prefix         = string
+      next_hop_type          = string
       next_hop_in_ip_address = optional(string)
     })))
   }))

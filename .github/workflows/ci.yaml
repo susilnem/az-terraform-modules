@@ -1,0 +1,38 @@
+name: Terraform CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - projects/*
+  pull_request:
+    branches:
+      - main
+      - develop
+      - projects/*
+  workflow_dispatch:
+jobs:
+  lint:
+    name: Terraform Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@main
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@main
+        with:
+          terraform_version: 1.11.0
+          terraform_wrapper: false
+      
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+        continue-on-error: true
+
+      - name: Terraform Format
+        run: terraform fmt -check

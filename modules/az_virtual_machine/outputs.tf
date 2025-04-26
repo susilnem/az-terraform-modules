@@ -5,12 +5,12 @@ output "vm_id" {
 
 output "vm_public_ip" {
   description = "The public IP address of the virtual machine."
-  value = azurerm_linux_virtual_machine.vm.public_ip_address
+  value       = azurerm_linux_virtual_machine.vm.public_ip_address
 }
 
 output "vm_private_ip" {
   description = "The private IP address of the virtual machine."
-  value = azurerm_linux_virtual_machine.vm.private_ip_address
+  value       = azurerm_linux_virtual_machine.vm.private_ip_address
 }
 
 output "vm_admin_username" {
@@ -24,7 +24,7 @@ output "vm_os_disk_id" {
 }
 output "vm_data_disks" {
   description = "The IDs of the data disks attached to the virtual machine."
-  value = azurerm_managed_disk.mg_disk[*].id
+  value       = azurerm_managed_disk.mg_disk[*].id
 }
 
 output "vm_network_interface_id" {

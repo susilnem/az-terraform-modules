@@ -1,3 +1,6 @@
+# During the initialization terragrunt will overwrite the configuration
+# live/terragrunt.hcl
+
 terraform {
   backend "azurerm" {
     resource_group_name  = "susilnemterraformstate-rg"

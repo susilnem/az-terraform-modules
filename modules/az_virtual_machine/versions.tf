@@ -1,8 +1,5 @@
-# Terraform setup and provider
-
 terraform {
   required_providers {
-    # Azure Resource Manager
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~>4.27.0"

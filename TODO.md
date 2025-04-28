@@ -1,0 +1,5 @@
+- [x] Setup GitHub Actions
+- [x] Setup GitHub Actions for Terraform
+- [x] Setup Terraform with terragrunt
+- [ ] Generic modules for Azure Network and Virtual Machines
+- [ ] Create module for Azure Kubernetes Service

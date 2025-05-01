@@ -22,6 +22,7 @@ dependency "network" {
     }
   }
 }
+
 inputs = merge(
     local.common_vars.locals.common_vars,
     {

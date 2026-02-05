@@ -15,5 +15,9 @@ repos:
     hooks:
       - id: terraform_validate
       - id: terraform_fmt
+        args:
+          - --args=-no-color
+          - --args=-diff
       - id: terraform_docs
-        args: [--check]
+        args:
+          - --args=--output-mode=replace

@@ -4,10 +4,10 @@
 
 ```
 /modules
-    ├── network/          # Module for virtual networks and subnets
-    ├── compute/          # Module for virtual machines and related resources
-    ├── storage/          # Module for storage accounts and containers
-    ├── security/         # Module for security groups and policies
+    ├── az_network/          # Module for virtual networks and subnets
+    ├── az_virtual_machine/  # Module for virtual machines and related resources
+    ├── storage/             # Module for storage accounts and containers
+    ├── security/            # Module for security groups and policies
 /main.tf                # Main Terraform configuration file
 /variables.tf           # Input variables for the project
 /outputs.tf             # Output values for the project

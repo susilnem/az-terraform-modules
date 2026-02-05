@@ -1,4 +1,4 @@
-name: Terraform CI
+name: CI
 
 on:
   push:
@@ -12,24 +12,66 @@ on:
       - develop
       - projects/*
   workflow_dispatch:
-jobs:
-  lint:
-    name: Terraform Checks
-    runs-on: ubuntu-latest
 
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    outputs:
+      terraform_version: 1.11.0
+      terragrunt_version: v3.60.0
     steps:
       - name: Checkout code
-        uses: actions/checkout@main
-      
+        uses: actions/checkout@v6
+
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@main
+        uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.11.0
           terraform_wrapper: false
-      
-      - name: Terraform Validate
-        run: terraform validate
-        continue-on-error: true
 
-      - name: Terraform Format
-        run: terraform fmt -check
+      # Install Terragrunt (and optionally OpenTofu)
+      - name: Install Terragrunt
+        uses: gruntwork-io/terragrunt-action@v3
+        with:
+          version: v3.60.0
+
+      # Cache Terraform modules and plugin downloads
+      - name: Cache Terraform modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            .terraform
+            ~/.terraform.d
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/*.tf') }}
+
+  lint:
+    name: Terragrunt Format Check
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Terragrunt Format Check
+        run: terragrunt hclfmt --terragrunt-check
+
+  validate:
+    name: Terragrunt Validate
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Terragrunt Validate
+        run: terragrunt validate
+
+  plan:
+    name: Terragrunt Plan
+    runs-on: ubuntu-latest
+    needs: setup
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Terragrunt Plan
+        run: terragrunt run-all plan --terragrunt-non-interactive

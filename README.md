@@ -17,6 +17,7 @@
 ## Prerequisites
 
 - [Terraform](https://www.terraform.io/downloads.html) installed
+- [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
 - Azure CLI installed and authenticated
 - An Azure subscription
 
@@ -30,7 +31,12 @@
 
 2. Initialize Terraform:
      ```bash
-     terraform init
+         terragrunt init
+     ```
+
+     # NOTE: In-order to update the version, run the following command:
+     ```bash
+         terragrunt run-all init -upgrade
      ```
 
 3. Review and customize variables in `variables.tf`.

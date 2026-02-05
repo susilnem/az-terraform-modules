@@ -19,14 +19,14 @@ remote_state {
 locals {
   azure_provider_config = <<EOF
 terraform {
+  required_version = ">= 1.6.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.58.0"
     }
   }
-
-  required_version = ">= 1.11.0"
 }
 
 provider "azurerm" {

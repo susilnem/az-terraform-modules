@@ -15,7 +15,7 @@ plugin "azurerm" {
     source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
 }
 
-# FIXME: USE rules to overide the warnings
+# FIXME: USE rules to override the warnings
 # Overriding the terraform_required_version
 rule "terraform_required_version" {
   enabled = false

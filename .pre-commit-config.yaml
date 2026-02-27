@@ -6,6 +6,7 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: detect-private-key
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:
@@ -14,10 +15,11 @@ repos:
     rev: v1.99.0 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
     hooks:
       - id: terraform_validate
-      - id: terraform_fmt
         args:
+         - --hook-config=--tf-path=tofu
+      - id: terraform_fmt
+      - id: terraform_tflint
+        args:
+         - --hook-config=--tf-path=tofu
           - --args=-no-color
           - --args=-diff
-      - id: terraform_docs
-        args:
-          - --args=--output-mode=replace

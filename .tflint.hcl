@@ -4,18 +4,18 @@ config {
 }
 
 plugin "terraform" {
-    enabled = true
-    version = "0.12.0"
-    source  = "github.com/terraform-linters/tflint-ruleset-terraform"
+  enabled = true
+  version = "0.12.0"
+  source  = "github.com/terraform-linters/tflint-ruleset-terraform"
 }
 
 plugin "azurerm" {
-    enabled = true
-    version = "0.23.0"
-    source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
+  enabled = true
+  version = "0.23.0"
+  source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
 }
 
-# FIXME: USE rules to overide the warnings
+# FIXME: USE rules to override the warnings
 # Overriding the terraform_required_version
 rule "terraform_required_version" {
   enabled = false

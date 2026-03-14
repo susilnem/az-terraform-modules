@@ -1,22 +1,19 @@
-# This file is maintained automatically by "terraform init".
+# This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
-provider "registry.terraform.io/hashicorp/azurerm" {
-  version     = "4.23.0"
-  constraints = "~> 4.23.0"
+provider "registry.opentofu.org/hashicorp/azurerm" {
+  version     = "4.58.0"
+  constraints = "~> 4.58.0"
   hashes = [
-    "h1:XW3jC2RJ0Vqgn+Ntm4FKPJhkUI5HhrwrfiAU5aikAoM=",
-    "zh:08d950618a2bf14445171a0eae3721b69be731d6732fad72e902e56e49d4d3b0",
-    "zh:1a9c84376a30cc890830d433ec21057417c012135b40af672dc915010160595a",
-    "zh:2db0422d03840b078a03a33599bbd1f6ea9569bf38ef2a2b99e6bcfc65e14400",
-    "zh:35884b51dcf73acc5fcc0ea22414226e4c3709798fac8948239d8601bfd23592",
-    "zh:5d84f4f588b478bbb7f4f3a943d722c9c14177b8003347b2d29978271bc19632",
-    "zh:5e232ba768cf8d7eb0adcf599f93cd89253f9c2af8e22160451ba6e0c7799101",
-    "zh:80807af8909c00df853c13b9cf363ba31ce013733ef353ac206f81033a1747fa",
-    "zh:8ced180e4377e5cd8a5138ec7eb64493ace692f5e5aa8bb5681154f431232f8a",
-    "zh:bd5b5cbbd0b38b91217251c1d977410bc930f11063e4e97c798c834dc00ef369",
-    "zh:c021b1ecf0a3c02bbb56d8e8ac14bdde04e9c1e5b2346563b53450aea468847e",
-    "zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c",
-    "zh:fc036967ce8f8322c91e93b20af0b68512df177018e975d742a91445d6b94b37",
+    "h1:DXEaadoG38C45w4xShoMGY8zGnGrh8YGVZFWf8B27fA=",
+    "zh:05e9a538cd705e94c20623c67825fff5f521f8489878fbe03b316ece1f716296",
+    "zh:240bba4c06058dcf452b2a193c6b38479d8c1b20267336a9f7247ca4951ed9aa",
+    "zh:2521de66f43433536139ba7c3d1127ac122baa2160ae839e3ebc7b99dfe82f16",
+    "zh:2f9cc3dc5489df24042324f9b2a1b6e9e5be4df13228e78f71e3199264db02b5",
+    "zh:44eca2e0697bcfed2c9fa2af7ff3027d3d3c50812f8eebf2fb6606f9e8b6263c",
+    "zh:552375812c2b04dab1f6e550ed31cecfa133c590ac24bbf4606d49799b4f4a15",
+    "zh:90781e35bd558ef994233731551e967c94251a1eb04b4a06f7994218d3e04dc9",
+    "zh:968ffd53dbc16dde853fd88b92dca5cf3ac1951bb7a8ceb10bc2b6dcbc2fbe0e",
+    "zh:d427ed21518fba72dd41d33e3a0c936985a6b796a27e5a3bee733e856a5d7171",
   ]
 }

@@ -2,7 +2,7 @@
 generate "backend" {
   path      = "backend.tf"
   if_exists = "overwrite_terragrunt"
-  contents = <<EOF
+  contents  = <<EOF
   terraform {
     backend "azurerm" {
       resource_group_name  = "susilnemterraformstate-rg"

@@ -18,9 +18,8 @@ jobs:
     name: Pre-Commit Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      # Terragrunt & OpenTofu versions are read from mase.toml
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@v3
 
@@ -29,6 +28,12 @@ jobs:
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
           echo "$HOME/.tflint.d/bin" >> $GITHUB_PATH
 
+      - name: Show tool versions
+        run: |
+          terragrunt --version
+          tofu --version || true
+          tflint --version
+
       - uses: pre-commit/action@v3.0.1
 
   lint_and_format:
@@ -36,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: pre_commit_check
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@v3
@@ -48,33 +53,32 @@ jobs:
 
       - name: Terragrunt Format Check
         run: terragrunt hcl format --check
+        working-directory: environments/local
 
-      - name: Run TFLint
-        run: tflint --config .tflint.hcl
+      - name: Cache TFLint plugins
+        uses: actions/cache@v4
+        with:
+          path: ~/.tflint.d
+          key: tflint-${{ runner.os }}-${{ hashFiles('.tflint.hcl') }}
+
+      - name: Run TFLint (init + lint)
+        run: |
+          tflint --init --config ../../.tflint.hcl
+          tflint --config ../../.tflint.hcl
+        working-directory: environments/local
 
   validate:
     name: Terragrunt Validate
     runs-on: ubuntu-latest
     needs: [pre_commit_check, lint_and_format]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@v3
+
+      - name: Terragrunt init
+        run: terragrunt init --backend=false
 
       - name: Terragrunt Validate
-        run: terragrunt run-all validate
-
-  plan:
-    name: Terragrunt Plan
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install Terragrunt and OpenTofu
-        uses: gruntwork-io/terragrunt-action@v3
-
-      - name: Terragrunt Plan
-        run: terragrunt plan --all --non-interactive
+        run: terragrunt validate

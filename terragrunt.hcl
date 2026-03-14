@@ -15,7 +15,6 @@ remote_state {
   }
 }
 
-
 locals {
   azure_provider_config = <<EOF
 terraform {
@@ -28,24 +27,16 @@ terraform {
     }
   }
 }
+
+provider "azurerm" {
+  features {}
+}
 EOF
 }
 
-# Configure the Azure provider
+# Generate providers
 generate "providers" {
   path      = "providers.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = local.azure_provider_config
-}
-
-generate "provider-az-network" {
-  path      = "modules/az_network/providers.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = local.azure_provider_config
-}
-
-generate "provider-az-virtual-machine" {
-  path      = "modules/az_virtual_machine/providers.tf"
   if_exists = "overwrite_terragrunt"
   contents  = local.azure_provider_config
 }

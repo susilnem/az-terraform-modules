@@ -1,23 +1,30 @@
+locals {
+  data_disks = { for d in coalesce(var.vm_config.data_disks, []) : d.name => d }
+  public_ip  = var.vm_config.public_ip ? { "public" = true } : {}
+}
+
 resource "azurerm_public_ip" "public_ip" {
-  count = var.vm_config.public_ip == true ? 1 : 0
+  for_each = local.public_ip
 
   name                = "${var.vm_config.name}-public-ip"
   location            = var.location
   resource_group_name = var.resource_group_name
   allocation_method   = var.vm_config.public_ip == true ? "Static" : "Dynamic"
   sku                 = "Standard"
+  tags                = var.tags
 }
 
 resource "azurerm_network_interface" "nt_interface" {
   name                = "${var.vm_config.name}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
+  tags                = var.tags
 
   ip_configuration {
     name                          = "internal"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = var.vm_config.public_ip == true ? azurerm_public_ip.public_ip[0].id : null
+    public_ip_address_id          = try(azurerm_public_ip.public_ip["public"].id, null)
   }
 }
 
@@ -27,6 +34,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location            = var.location
   size                = var.vm_config.size
   admin_username      = var.vm_config.admin_username
+  tags                = var.tags
+
   network_interface_ids = [
     azurerm_network_interface.nt_interface.id,
   ]
@@ -61,21 +70,22 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
 
 resource "azurerm_managed_disk" "mg_disk" {
-  count = lookup(var.vm_config, "data_disks", null) != null ? length(var.vm_config.data_disks) : 0
+  for_each = local.data_disks
 
-  name                 = var.vm_config.data_disks[count.index].name
+  name                 = each.value.name
   location             = var.location
   resource_group_name  = var.resource_group_name
-  storage_account_type = var.vm_config.data_disks[count.index].storage_account_type
-  disk_size_gb         = var.vm_config.data_disks[count.index].disk_size_gb
+  storage_account_type = each.value.storage_account_type
+  disk_size_gb         = each.value.disk_size_gb
   create_option        = "Empty"
+  tags                 = var.tags
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "vm_disk_attach" {
-  count = lookup(var.vm_config, "data_disks", null) != null ? length(var.vm_config.data_disks) : 0
+  for_each = local.data_disks
 
-  managed_disk_id    = azurerm_managed_disk.mg_disk[count.index].id
+  managed_disk_id    = azurerm_managed_disk.mg_disk[each.key].id
   virtual_machine_id = azurerm_linux_virtual_machine.vm.id
-  lun                = var.vm_config.data_disks[count.index].lun
+  lun                = each.value.lun
   caching            = "ReadWrite"
 }

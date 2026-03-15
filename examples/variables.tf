@@ -3,6 +3,12 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "tags" {
+  description = "Common tags applied to all resources"
+  type        = map(string)
+  default     = {}
+}
+
 variable "location" {
   description = "Azure region"
   type        = string
@@ -63,7 +69,6 @@ variable "vm_configs" {
   description = "Map of virtual machine configurations"
   type = map(object({
     name                     = string
-    subnet_key               = string
     size                     = string
     admin_username           = string
     admin_ssh_key_public_key = string

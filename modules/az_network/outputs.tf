@@ -4,13 +4,13 @@ output "vnet_id" {
 }
 
 output "subnets" {
-  description = "The IDs and names of the subnets"
-  value = {
-    for k, subnet in azurerm_subnet.subnet : k => {
-      id   = subnet.id
-      name = subnet.name
-    }
-  }
+  description = "Map of subnet key to subnet ID"
+  value       = { for k, subnet in azurerm_subnet.subnet : k => subnet.id }
+}
+
+output "subnet_names" {
+  description = "Map of subnet key to subnet name"
+  value       = { for k, subnet in azurerm_subnet.subnet : k => subnet.name }
 }
 
 output "nsg_ids" {

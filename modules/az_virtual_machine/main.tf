@@ -4,14 +4,16 @@ resource "azurerm_public_ip" "public_ip" {
   name                = "${var.vm_config.name}-public-ip"
   location            = var.location
   resource_group_name = var.resource_group_name
-  allocation_method   = var.vm_config.public_ip == true ? "Static" : "Dynamic"
+  allocation_method   = "Static"
   sku                 = "Standard"
+  tags                = var.tags
 }
 
 resource "azurerm_network_interface" "nt_interface" {
   name                = "${var.vm_config.name}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
+  tags                = var.tags
 
   ip_configuration {
     name                          = "internal"
@@ -27,18 +29,28 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location            = var.location
   size                = var.vm_config.size
   admin_username      = var.vm_config.admin_username
+  tags                = var.tags
   network_interface_ids = [
     azurerm_network_interface.nt_interface.id,
   ]
 
+  disable_password_authentication = true
+  encryption_at_host_enabled      = var.vm_config.encryption_at_host_enabled
+  patch_mode                      = var.vm_config.patch_mode
+  patch_assessment_mode           = var.vm_config.patch_assessment_mode
+
   admin_ssh_key {
     username   = var.vm_config.admin_username
-    public_key = file(var.vm_config.admin_ssh_key_public_key)
+    public_key = file(pathexpand(var.vm_config.admin_ssh_key_public_key))
   }
 
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
+  }
+
+  boot_diagnostics {
+    storage_account_uri = null
   }
 
   source_image_reference {
@@ -69,6 +81,7 @@ resource "azurerm_managed_disk" "mg_disk" {
   storage_account_type = var.vm_config.data_disks[count.index].storage_account_type
   disk_size_gb         = var.vm_config.data_disks[count.index].disk_size_gb
   create_option        = "Empty"
+  tags                 = var.tags
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "vm_disk_attach" {

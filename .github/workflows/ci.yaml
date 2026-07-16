@@ -13,72 +13,118 @@ on:
       - projects/*
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pre_commit_check:
     name: Pre-Commit Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Terragrunt and OpenTofu
-        uses: gruntwork-io/terragrunt-action@v3
+      - uses: gruntwork-io/terragrunt-action@v3
 
       - name: Install TFLint
-        run: |
-          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          echo "$HOME/.tflint.d/bin" >> $GITHUB_PATH
-
-      - name: Show tool versions
-        run: |
-          terragrunt --version
-          tofu --version || true
-          tflint --version
+        uses: terraform-linters/setup-tflint@v6.3.0
+        with:
+          tflint_version: v0.63.1
 
       - uses: pre-commit/action@v3.0.1
+
+  module_tests:
+    name: Module Unit Tests (terraform test)
+    runs-on: ubuntu-latest
+    needs: pre_commit_check
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gruntwork-io/terragrunt-action@v3
+
+      - name: Run module tests
+        run: |
+          set -euo pipefail
+          for module_dir in modules/*/; do
+            echo "== ${module_dir} =="
+            (cd "${module_dir}" && terraform init -backend=false -input=false && terraform test)
+          done
 
   lint_and_format:
     name: Terragrunt Lint & Format
     runs-on: ubuntu-latest
     needs: pre_commit_check
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Terragrunt and OpenTofu
-        uses: gruntwork-io/terragrunt-action@v3
-
-      - name: Install TFLint
-        run: |
-          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          echo "$HOME/.tflint.d/bin" >> $GITHUB_PATH
+      - uses: gruntwork-io/terragrunt-action@v3
 
       - name: Terragrunt Format Check
-        run: terragrunt hcl format --check
-        working-directory: environments/local
-
-      - name: Cache TFLint plugins
-        uses: actions/cache@v4
-        with:
-          path: ~/.tflint.d
-          key: tflint-${{ runner.os }}-${{ hashFiles('.tflint.hcl') }}
-
-      - name: Run TFLint (init + lint)
-        run: |
-          tflint --init --config ../../.tflint.hcl
-          tflint --config ../../.tflint.hcl
+        run: terragrunt run-all hclfmt --check
         working-directory: environments/local
 
   validate:
     name: Terragrunt Validate
     runs-on: ubuntu-latest
-    needs: [pre_commit_check, lint_and_format]
+    needs: [pre_commit_check, lint_and_format, module_tests]
+    timeout-minutes: 15
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Terragrunt and OpenTofu
-        uses: gruntwork-io/terragrunt-action@v3
-
-      - name: Terragrunt init
-        run: terragrunt init --backend=false
+      - uses: gruntwork-io/terragrunt-action@v3
 
       - name: Terragrunt Validate
-        run: terragrunt validate
+        run: terragrunt run-all validate
+        working-directory: environments/local
+
+  plan:
+    name: Terragrunt Plan
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gruntwork-io/terragrunt-action@v3
+
+      - name: Terragrunt Plan
+        id: plan
+        working-directory: environments/local
+        continue-on-error: true
+        run: terragrunt run-all plan --non-interactive 2>&1 | tee "${{ runner.temp }}/plan-output.txt"
+
+      - name: Comment plan on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync(process.env.PLAN_FILE, 'utf8').slice(-60000);
+            const body = `#### Terragrunt Plan\n<details><summary>Show plan output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n\n</details>`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+        env:
+          PLAN_FILE: ${{ runner.temp }}/plan-output.txt
+
+      - name: Fail job if plan failed
+        if: steps.plan.outcome == 'failure'
+        run: exit 1

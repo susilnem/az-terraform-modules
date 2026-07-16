@@ -20,7 +20,7 @@ output "vm_admin_username" {
 
 output "vm_os_disk_id" {
   description = "The ID of the OS disk of the virtual machine."
-  value       = azurerm_linux_virtual_machine.vm.os_disk[0]
+  value       = azurerm_linux_virtual_machine.vm.os_disk[0].id
 }
 output "vm_data_disks" {
   description = "The IDs of the data disks attached to the virtual machine."

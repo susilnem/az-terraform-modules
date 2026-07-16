@@ -10,7 +10,7 @@ locals {
 
 # NOTE: Determines the modules and the environment variables
 terraform {
-  source = "../../../modules/az_virtual_machine/"
+  source = "../../../modules/az_aks/"
 }
 
 dependency "network" {
@@ -27,17 +27,19 @@ inputs = merge(
   local.common_vars.locals.common_vars,
   {
     subnet_id = dependency.network.outputs.subnets["public"]
-    vm_config = {
-      name                     = "public-vm"
-      size                     = "Standard_B1s"
-      admin_username           = "adminuser"
-      admin_ssh_key_public_key = "~/.ssh/id_rsa.pub"
-      public_ip                = true
-      os_image = {
-        publisher = "Canonical"
-        offer     = "UbuntuServer"
-        sku       = "18.04-LTS"
-        version   = "latest"
+    aks_config = {
+      name       = "aks-example"
+      dns_prefix = "aksexample"
+      default_node_pool = {
+        name                 = "default"
+        vm_size              = "Standard_B2s"
+        auto_scaling_enabled = true
+        min_count            = 1
+        max_count            = 3
+      }
+      network_profile = {
+        network_plugin = "azure"
+        network_policy = "azure"
       }
     }
   }

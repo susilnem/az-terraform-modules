@@ -10,23 +10,23 @@ override_resource {
 }
 
 override_resource {
-  target = azurerm_network_interface.nt_interface
+  target = azurerm_network_interface.network_interface
   values = {
     id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.Network/networkInterfaces/vm-test-nic"
   }
 }
 
 variables {
-  resource_group_name = "rg-test"
-  location            = "eastus"
-  subnet_id           = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.Network/virtualNetworks/vnet-test/subnets/public"
+  resource_group_name      = "rg-test"
+  location                 = "eastus"
+  subnet_id                = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.Network/virtualNetworks/vnet-test/subnets/public"
+  admin_ssh_key_public_key = "tests/fixtures/dummy_key.pub"
 
   vm_config = {
-    name                     = "vm-test"
-    size                     = "Standard_B1s"
-    admin_username           = "azureadmin"
-    admin_ssh_key_public_key = "tests/fixtures/dummy_key.pub"
-    public_ip                = true
+    name           = "vm-test"
+    size           = "Standard_B1s"
+    admin_username = "azureadmin"
+    public_ip      = true
     os_image = {
       publisher = "Canonical"
       offer     = "UbuntuServer"
@@ -44,11 +44,10 @@ run "rejects_invalid_size" {
   command = plan
   variables {
     vm_config = {
-      name                     = "vm-test"
-      size                     = "B1s"
-      admin_username           = "azureadmin"
-      admin_ssh_key_public_key = "tests/fixtures/dummy_key.pub"
-      public_ip                = true
+      name           = "vm-test"
+      size           = "B1s"
+      admin_username = "azureadmin"
+      public_ip      = true
       os_image = {
         publisher = "Canonical"
         offer     = "UbuntuServer"
@@ -64,11 +63,10 @@ run "rejects_disallowed_admin_username" {
   command = plan
   variables {
     vm_config = {
-      name                     = "vm-test"
-      size                     = "Standard_B1s"
-      admin_username           = "administrator"
-      admin_ssh_key_public_key = "tests/fixtures/dummy_key.pub"
-      public_ip                = true
+      name           = "vm-test"
+      size           = "Standard_B1s"
+      admin_username = "administrator"
+      public_ip      = true
       os_image = {
         publisher = "Canonical"
         offer     = "UbuntuServer"
@@ -84,11 +82,10 @@ run "rejects_duplicate_data_disk_luns" {
   command = plan
   variables {
     vm_config = {
-      name                     = "vm-test"
-      size                     = "Standard_B1s"
-      admin_username           = "azureadmin"
-      admin_ssh_key_public_key = "tests/fixtures/dummy_key.pub"
-      public_ip                = true
+      name           = "vm-test"
+      size           = "Standard_B1s"
+      admin_username = "azureadmin"
+      public_ip      = true
       os_image = {
         publisher = "Canonical"
         offer     = "UbuntuServer"

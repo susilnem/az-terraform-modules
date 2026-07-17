@@ -9,7 +9,7 @@ resource "azurerm_public_ip" "public_ip" {
   tags                = var.tags
 }
 
-resource "azurerm_network_interface" "nt_interface" {
+resource "azurerm_network_interface" "network_interface" {
   name                = "${var.vm_config.name}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -31,7 +31,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   admin_username      = var.vm_config.admin_username
   tags                = var.tags
   network_interface_ids = [
-    azurerm_network_interface.nt_interface.id,
+    azurerm_network_interface.network_interface.id,
   ]
 
   disable_password_authentication = true
@@ -41,7 +41,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   admin_ssh_key {
     username   = var.vm_config.admin_username
-    public_key = file(pathexpand(var.vm_config.admin_ssh_key_public_key))
+    public_key = file(pathexpand(var.admin_ssh_key_public_key))
   }
 
   os_disk {
@@ -72,7 +72,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 }
 
 
-resource "azurerm_managed_disk" "mg_disk" {
+resource "azurerm_managed_disk" "managed_disk" {
   count = lookup(var.vm_config, "data_disks", null) != null ? length(var.vm_config.data_disks) : 0
 
   name                 = var.vm_config.data_disks[count.index].name
@@ -87,7 +87,7 @@ resource "azurerm_managed_disk" "mg_disk" {
 resource "azurerm_virtual_machine_data_disk_attachment" "vm_disk_attach" {
   count = lookup(var.vm_config, "data_disks", null) != null ? length(var.vm_config.data_disks) : 0
 
-  managed_disk_id    = azurerm_managed_disk.mg_disk[count.index].id
+  managed_disk_id    = azurerm_managed_disk.managed_disk[count.index].id
   virtual_machine_id = azurerm_linux_virtual_machine.vm.id
   lun                = var.vm_config.data_disks[count.index].lun
   caching            = "ReadWrite"

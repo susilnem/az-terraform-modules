@@ -69,7 +69,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "additional" {
+resource "azurerm_kubernetes_cluster_node_pool" "node_pool" {
   count = length(var.aks_config.additional_node_pools)
 
   name                  = var.aks_config.additional_node_pools[count.index].name

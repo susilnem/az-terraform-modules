@@ -1,3 +1,7 @@
+# Terragrunt defaults to `tofu` if both tofu and terraform are on PATH;
+# force terraform explicitly to match mise.toml and the pinned CI toolchain.
+terraform_binary = "terraform"
+
 # Generate a backend configuration file for the root module
 generate "backend" {
   path      = "backend.tf"

@@ -11,9 +11,6 @@ check "nsg_and_route_table_keys_match_subnets" {
 }
 
 locals {
-  # The "check" block above only warns, it doesn't block. Filtering the
-  # resource for_each expressions themselves means a typo'd key never creates
-  # an orphaned NSG/route table, on top of surfacing the check's clear warning.
   nsg_configs_with_subnet         = { for key, value in var.nsg_configs : key => value if contains(keys(var.subnet_configs), key) }
   route_table_configs_with_subnet = { for key, value in var.route_table_configs : key => value if contains(keys(var.subnet_configs), key) }
 }

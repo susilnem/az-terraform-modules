@@ -24,15 +24,15 @@ output "vm_os_disk_id" {
 }
 output "vm_data_disks" {
   description = "The IDs of the data disks attached to the virtual machine."
-  value       = azurerm_managed_disk.mg_disk[*].id
+  value       = azurerm_managed_disk.managed_disk[*].id
 }
 
 output "vm_network_interface_id" {
   description = "The ID of the network interface attached to the virtual machine."
-  value       = azurerm_network_interface.nt_interface.id
+  value       = azurerm_network_interface.network_interface.id
 }
 
 output "vm_network_interface_private_ip" {
   description = "The private IP address of the network interface attached to the virtual machine."
-  value       = azurerm_network_interface.nt_interface.private_ip_address
+  value       = azurerm_network_interface.network_interface.private_ip_address
 }

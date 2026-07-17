@@ -24,13 +24,18 @@ variable "subnet_id" {
   type        = string
 }
 
+variable "admin_ssh_key_public_key" {
+  description = "Path to the SSH public key file for the VM admin user. Set via -var or TF_VAR_admin_ssh_key_public_key."
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
+}
+
 variable "vm_config" {
   description = "Virtual machine configuration"
   type = object({
     name                       = string
     size                       = string
     admin_username             = string
-    admin_ssh_key_public_key   = string
     public_ip                  = bool
     custom_data                = optional(string)
     encryption_at_host_enabled = optional(bool, false)

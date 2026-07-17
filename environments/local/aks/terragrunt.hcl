@@ -10,15 +10,15 @@ locals {
 
 # NOTE: Determines the modules and the environment variables
 terraform {
-  source = "../../../modules/az_aks/"
+  source = "../../../modules/aks/"
 }
 
 dependency "network" {
   config_path = "../network"
 
   mock_outputs = {
-    subnets = {
-      public = "subnet-id-public"
+    network_subnets = {
+      private = "subnet-id-private"
     }
   }
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
@@ -26,21 +26,24 @@ dependency "network" {
 inputs = merge(
   local.common_vars.locals.common_vars,
   {
-    subnet_id = dependency.network.outputs.subnets["public"]
+    subnet_id = dependency.network.outputs.network_subnets["private"]
     aks_config = {
-      name       = "aks-example"
-      dns_prefix = "aksexample"
+      name       = "aks-testing"
+      dns_prefix = "akstesting"
       default_node_pool = {
         name                 = "default"
         vm_size              = "Standard_B2s"
-        auto_scaling_enabled = true
-        min_count            = 1
-        max_count            = 3
+        auto_scaling_enabled = false
+        node_count           = 1
       }
       network_profile = {
         network_plugin = "azure"
         network_policy = "azure"
+        # Must not overlap the VNet's own address space (10.0.0.0/16).
+        service_cidr   = "172.16.0.0/16"
+        dns_service_ip = "172.16.0.10"
       }
+      authorized_ip_ranges = ["110.34.1.108/32"]
     }
   }
 )

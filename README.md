@@ -4,17 +4,17 @@
 
 ```
 /modules
-    ├── az_network/          # Module for virtual networks, subnets, NSGs, and route tables
-    ├── az_virtual_machine/  # Module for Linux virtual machines and related resources
-    ├── az_aks/              # Module for Azure Kubernetes Service clusters
+    ├── network/          # Module for virtual networks, subnets, NSGs, and route tables
+    ├── virtual_machine/  # Module for Linux virtual machines and related resources
+    ├── aks/              # Module for Azure Kubernetes Service clusters
 /environments
-    ├── root.hcl             # Shared terragrunt root config (remote state backend + provider generation)
-    ├── commonenv/           # Shared variables (resource group, location, tags) for all environments
+    ├── root.hcl          # Shared terragrunt root config (remote state backend + provider generation)
+    ├── commonenv/        # Shared variables (resource group, location, tags) for all environments
     ├── local/
-        ├── network/         # terragrunt unit for az_network
-        ├── virtual_machine/ # terragrunt unit for az_virtual_machine
-        ├── aks/             # terragrunt unit for az_aks
-/README.md               # Project documentation
+        ├── network/         # terragrunt unit for modules/network
+        ├── virtual_machine/ # terragrunt unit for modules/virtual_machine
+        ├── aks/             # terragrunt unit for modules/aks
+/README.md            # Project documentation
 ```
 
 ## Prerequisites
@@ -35,7 +35,15 @@
 
 2. Review and customize the shared variables in `environments/commonenv/common.hcl` (`resource_group_name`, `location`, `tags`), and the per-unit `inputs` in each `environments/local/*/terragrunt.hcl`.
 
-3. Plan and apply a single unit, e.g. the network:
+3. One-time Azure setup — none of the modules create these for you, so they must exist before `terragrunt apply`:
+     ```bash
+     az login
+     ./scripts/create-backend.sh          # state storage: resource group + storage account + container
+     ./scripts/create-resource-group.sh   # the resource_group_name from common.hcl that network/vm/aks deploy into
+     ```
+   Both are idempotent (safe to re-run) and read their defaults from the same names already used in `environments/root.hcl` / `commonenv/common.hcl`; override via env vars (e.g. `RESOURCE_GROUP=my-rg ./scripts/create-resource-group.sh`) if you rename either in those files.
+
+4. Plan and apply a single unit, e.g. the network:
      ```bash
      cd environments/local/network
      terragrunt plan
@@ -49,25 +57,26 @@
      terragrunt run-all apply
      ```
 
-4. To update provider versions:
+5. To update provider versions:
      ```bash
      terragrunt run-all init -upgrade
      ```
 
-5. Destroy the infrastructure when no longer needed:
+6. Destroy the infrastructure when no longer needed:
      ```bash
      terragrunt run-all destroy
      ```
+   (This does not delete the resource group or state backend created in step 3 — remove those manually if you're done with them entirely.)
 
 ## Modules
 
-### Network Module (`modules/az_network`)
+### Network Module (`modules/network`)
 Provisions a virtual network, subnets, network security groups, and route tables. Validates CIDR blocks, NSG rule fields, and route next-hop types; asserts `nsg_configs`/`route_table_configs` keys match `subnet_configs` keys.
 
-### Virtual Machine Module (`modules/az_virtual_machine`)
+### Virtual Machine Module (`modules/virtual_machine`)
 Provisions Linux VMs with SSH-key-only auth, managed boot diagnostics, and optional encryption-at-host and platform-managed patching (`patch_mode`/`patch_assessment_mode`, both default to `AutomaticByPlatform`).
 
-### AKS Module (`modules/az_aks`)
+### AKS Module (`modules/aks`)
 Provisions an AKS cluster with optional private cluster mode, API server authorized IP ranges, Azure AD RBAC, local account disablement, OIDC issuer/workload identity, Microsoft Defender, and autoscaling node pools (default and additional).
 
 ### Shared: `tags`

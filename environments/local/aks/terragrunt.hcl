@@ -10,7 +10,7 @@ locals {
 
 # NOTE: Determines the modules and the environment variables
 terraform {
-  source = "../../../modules/virtual_machine/"
+  source = "../../../modules/aks/"
 }
 
 dependency "network" {
@@ -27,20 +27,23 @@ inputs = merge(
   local.common_vars.locals.common_vars,
   {
     subnet_id = dependency.network.outputs.network_subnets["private"]
-    # admin_ssh_key_public_key intentionally not set here — leaving it unset
-    # lets TF_VAR_admin_ssh_key_public_key (or -var) pass through to the
-    # module; setting it here would override both via terragrunt's -var flag.
-    vm_config = {
-      name           = "private-vm"
-      size           = "Standard_B1s"
-      admin_username = "adminuser"
-      public_ip      = false
-      os_image = {
-        publisher = "Canonical"
-        offer     = "UbuntuServer"
-        sku       = "18.04-LTS"
-        version   = "latest"
+    aks_config = {
+      name       = "aks-testing"
+      dns_prefix = "akstesting"
+      default_node_pool = {
+        name                 = "default"
+        vm_size              = "Standard_B2s"
+        auto_scaling_enabled = false
+        node_count           = 1
       }
+      network_profile = {
+        network_plugin = "azure"
+        network_policy = "azure"
+        # Must not overlap the VNet's own address space (10.0.0.0/16).
+        service_cidr   = "172.16.0.0/16"
+        dns_service_ip = "172.16.0.10"
+      }
+      authorized_ip_ranges = ["110.34.1.108/32"]
     }
   }
 )

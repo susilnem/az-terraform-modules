@@ -10,7 +10,7 @@ locals {
 
 # NOTE: Determines the modules and the environment variables
 terraform {
-  source = "../../../modules/az_network"
+  source = "../../../modules/network"
 }
 
 inputs = merge(
@@ -18,7 +18,7 @@ inputs = merge(
   {
     # Virtual Network Configuration
     vnet_config = {
-      name          = "vnet-example"
+      name          = "vnet-testing"
       address_space = ["10.0.0.0/16"]
     }
     # Subnet Configuration
@@ -42,7 +42,7 @@ inputs = merge(
             protocol                   = "Tcp"
             source_port_range          = "*"
             destination_port_range     = "22"
-            source_address_prefix      = "*"
+            source_address_prefix      = "110.34.1.108/32"
             destination_address_prefix = "*"
           }
         ]

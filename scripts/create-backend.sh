@@ -87,4 +87,4 @@ echo "  storage_account_name = ${STORAGE_ACCOUNT}"
 echo "  container_name       = ${CONTAINER}"
 echo
 echo "These already match environments/root.hcl's generated backend config, so you can now run:"
-echo "  cd environments/local && terragrunt run-all init"
+echo "  cd environments/local && terragrunt run --all -- init"

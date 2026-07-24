@@ -53,18 +53,18 @@
    Or plan/apply every unit together (network → virtual_machine/aks, respecting `dependency` blocks):
      ```bash
      cd environments/local
-     terragrunt run-all plan
-     terragrunt run-all apply
+     terragrunt run --all -- plan
+     terragrunt run --all -- apply
      ```
 
 5. To update provider versions:
      ```bash
-     terragrunt run-all init -upgrade
+     terragrunt run --all -- init -upgrade
      ```
 
 6. Destroy the infrastructure when no longer needed:
      ```bash
-     terragrunt run-all destroy
+     terragrunt run --all -- destroy
      ```
    (This does not delete the resource group or state backend created in step 3 — remove those manually if you're done with them entirely.)
 

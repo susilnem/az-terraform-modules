@@ -64,7 +64,7 @@ jobs:
       - uses: gruntwork-io/terragrunt-action@v3
 
       - name: Terragrunt Format Check
-        run: terragrunt run-all hclfmt --check
+        run: terragrunt hcl format --check
         working-directory: environments/local
 
   validate:
@@ -72,59 +72,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [pre_commit_check, lint_and_format, module_tests]
     timeout-minutes: 15
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: gruntwork-io/terragrunt-action@v3
 
       - name: Terragrunt Validate
-        run: terragrunt run-all validate
+        run: terragrunt run --all -- validate
         working-directory: environments/local
-
-  plan:
-    name: Terragrunt Plan
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'pull_request'
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      pull-requests: write
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: gruntwork-io/terragrunt-action@v3
-
-      - name: Terragrunt Plan
-        id: plan
-        working-directory: environments/local
-        continue-on-error: true
-        run: terragrunt run-all plan --non-interactive 2>&1 | tee "${{ runner.temp }}/plan-output.txt"
-
-      - name: Comment plan on PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const output = fs.readFileSync(process.env.PLAN_FILE, 'utf8').slice(-60000);
-            const body = `#### Terragrunt Plan\n<details><summary>Show plan output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n\n</details>`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body,
-            });
         env:
-          PLAN_FILE: ${{ runner.temp }}/plan-output.txt
-
-      - name: Fail job if plan failed
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
+          TG_LOCAL_BACKEND: "true"
